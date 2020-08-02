@@ -93,8 +93,12 @@ def success():
             savepath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
             convertpath = os.path.splitext(os.path.basename(savepath))[0]+'.zip'
             f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER']})
-            os.remove(savepath)
+            try:
+                mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER']})
+                os.remove(savepath)
+            except:
+                os.remove(savepath)
+                return redirect('/')
             return redirect('/downloads/'+ convertpath)
         else:
             return redirect('/')
