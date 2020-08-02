@@ -1,0 +1,12 @@
+Dockerfile
+__pycache__
+install.sh
+setup_python.sh
+README.md
+*.zip
+*.mbz
+.git
+.gitignore
+docker-compose.yml
+*.example
+.env

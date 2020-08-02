@@ -1,0 +1,10 @@
+version: "3"
+services:
+  mbz:
+    image: tna76874/mbztool:latest
+    container_name: mbztool
+    ports:
+     - "127.0.0.1:${TCPPORT}:5000"
+    environment:
+     - LOG_LEVEL=info
+    restart: unless-stopped

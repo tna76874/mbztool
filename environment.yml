@@ -1,0 +1,13 @@
+name: mbz
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - pip
+  - pip:
+      - glob2
+      - colorama
+      - sqlalchemy
+      - numpy==1.18.4
+      - pandas==1.0.3
+      - pandas_read_xml
