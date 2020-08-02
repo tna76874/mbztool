@@ -48,7 +48,11 @@ from werkzeug.utils import secure_filename
 from mbzbot import mbzbot
 
 # Initialize Flask app
-app = Flask(__name__)  
+app = Flask(__name__,
+            static_url_path='', 
+            static_folder='web/static',
+            template_folder='web/templates')  
+
 app.config['UPLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/uploads")
 app.config['DOWNLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/downloads")
 app.config['MAX_CONTENT_LENGTH'] = 150 * 1024 * 1024 # 150MB Limit
@@ -78,7 +82,15 @@ def upload():
     """
     return 'index.html' when access '/'
     """
-    return render_template("index.html")  
+    return render_template("index.html")
+
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return app.send_static_file(os.path.join(path))
  
 @app.route('/upload', methods = ['POST'])  
 def success():
