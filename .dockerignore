@@ -1,7 +1,7 @@
 Dockerfile
 __pycache__
 install.sh
-setup_python.sh
+deploy.sh
 README.md
 *.zip
 *.mbz
