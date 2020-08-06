@@ -54,14 +54,14 @@ else
     source .env
 
     sed -i \
-        -e "s/TCPPORT/${HTTPPORT}/g" \
-        -e "s/MYDOMAIN/${HOSTNAME}/g" \
+        -e "s/TCPPORT/${TCPPORT}/g" \
+        -e "s/MYDOMAIN/${DOMAIN}/g" \
         "$(dirname "$0")/nginx"
 
-    sudo cp nginx /etc/nginx/sites-available/"${HOSTNAME}"
+    sudo cp nginx /etc/nginx/sites-available/"${DOMAIN}"
     rm nginx
-    sudo ln -s /etc/nginx/sites-available/"${HOSTNAME}" /etc/nginx/sites-enabled/"${HOSTNAME}"
-    sudo certbot --nginx --expand -d "${HOSTNAME}"
+    sudo ln -s /etc/nginx/sites-available/"${DOMAIN}" /etc/nginx/sites-enabled/"${DOMAIN}"
+    sudo certbot --nginx --expand -d "${DOMAIN}"
 fi
 }
 
