@@ -88,6 +88,7 @@ prerequisites() {
         docker-ce docker-ce-cli containerd.io docker-compose
     sudo usermod -aG docker $USER
     sudo systemctl restart docker
+    newgrp docker
 }
 
 ####### Parsing arguments
