@@ -5,6 +5,7 @@ extract
 *.mbz
 docker-compose.yml
 .env
+get-docker.sh
 
 __pycache__
 *.py[cod]

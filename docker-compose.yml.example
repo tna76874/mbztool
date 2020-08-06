@@ -1,8 +1,8 @@
 version: "3"
 services:
-  mbz:
+  mbztool:
     image: tna76874/mbztool:latest
-    container_name: mbztool
+    container_name: ${COMPOSE_PROJECT_NAME}
     ports:
      - "127.0.0.1:${TCPPORT}:5000"
     environment:
