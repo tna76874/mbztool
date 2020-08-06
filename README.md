@@ -56,17 +56,18 @@ docker-compose up -d
 ##### Syntax
 
 ```bash
-Usage: ./install.sh -[p|s|b|a|c|h]
+Usage: ./install.sh -[p|s|b|a|c|n|h]
 
    -p,      Install prerequisites (docker, docker-compose)
    -s,      Setup environment
    -b,      Build docker image
    -a,      Create anaconda environment
    -c,      Deploy mbzbot.py as system script
+   -n,      Generate nginx virtual host
    -h,      Print this help text
 
 If the script will be called without parameters, it will run:
-    ./install.sh -p -s -b
+    ./install.sh -p -s -b -n
 ```
 
 ##### Credits

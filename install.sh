@@ -39,6 +39,14 @@ environment() {
 
 # Configure nginx virtual host
 nginxit() {
+if $(confirm "Install nginx and certbot?") ; then
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install software-properties-common nginx -qy
+    sudo DEBIAN_FRONTEND=noninteractive add-apt-repository universe
+    sudo DEBIAN_FRONTEND=noninteractive add-apt-repository ppa:certbot/certbot
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install certbot python3-certbot-nginx -qy
+fi
 if [ ! -f .env ]; then
         echo -e "No .env file found." 
 else
@@ -94,22 +102,23 @@ prerequisites() {
 ####### Parsing arguments
 #Usage print
 usage() {
-    echo "Usage: $0 -[p|s|b|a|c|h]" >&2
+    echo "Usage: $0 -[p|s|b|a|c|n|h]" >&2
     echo "
    -p,      Install prerequisites (docker, docker-compose)
    -s,      Setup environment
    -b,      Build docker image
    -a,      Create anaconda environment
    -c,      Deploy mbzbot.py as system script
+   -n,      Generate nginx virtual host
    -h,      Print this help text
 
 If the script will be called without parameters, it will run:
-    $0 -p -s -b``
+    $0 -p -s -b -n
    ">&2
     exit 1
 }
 
-while getopts ':psbach' opt
+while getopts ':psbacnh' opt
 #putting : in the beginnnig suppresses the errors for invalid options
 do
 case "$opt" in
@@ -122,6 +131,8 @@ case "$opt" in
    'a')conda env create -f environment.yml;
        ;;
    'c')deploysystem;
+       ;;
+   'n')nginxit;
        ;;
    'h')usage;
        ;;
@@ -139,7 +150,7 @@ if [ $OPTIND -eq 1 ]; then
     if $(confirm "Build docker image?") ; then
         builddocker
     fi
+    if $(confirm "Generate nginx virtual host?") ; then
+        nginxit
+    fi
 fi
-
-
-
