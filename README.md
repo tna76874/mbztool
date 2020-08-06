@@ -1,6 +1,8 @@
 # mbztool
 
- moodle backup files extractor (mbz) - usable as command-line-tool or with a webserver
+moodle backup files extractor (mbz) - usable as command-line-tool or with a webserver
+
+<img src="web/static/logo.svg" style="zoom:500%;" /> 
 
 ##### Anaconda
 
@@ -34,21 +36,15 @@ Convert:
 ##### Deploy as system script
 
 ```bash
-./install.sh -s
+./install.sh -c
 ```
 
 ##### Deploy as docker image
 
-Set up the environment and the docker-compose file. If you do not use a public accessible server, just ignore the domain input question.
+If you want to run mbztool via a docker webserver, you need docker and docker-compose installed. By running the install script, both will be installed. Also the environment and the docker-compose file gets initialized.
 
 ```bash
-./deploy.sh
-```
-
-Optional: Build the docker image, otherwise it will be pulled from docker hub
-
-```
-./install.sh -b
+./install.sh
 ```
 
 Start the docker image:
@@ -60,28 +56,17 @@ docker-compose up -d
 ##### Syntax
 
 ```bash
-$ ./mbzbot.py -h
-usage: mbzbot.py [-h] [-f F] [-a]
+Usage: ./install.sh -[p|s|b|a|c|h]
 
-optional arguments:
-  -h, --help  show this help message and exit
-  -f F        mbz file to extract
-  -a          convert all mbz files in current directory
-```
+   -p,      Install prerequisites (docker, docker-compose)
+   -s,      Setup environment
+   -b,      Build docker image
+   -a,      Create anaconda environment
+   -c,      Deploy mbzbot.py as system script
+   -h,      Print this help text
 
-```bash
-$ ./install.sh -h
-
-install.sh [-h|-i|-p|-u|-s|-b|-e]  -- simple environment installer for mbz environment and docker image builder
-
-where:
-    -h  show this help text
-    -i	install conda environment and packages from environment.yml
-    -p	install pip packages from requirement.txt
-    -u  remove conda environment
-    -s  copy script to /usr/local/bin
-    -b  build docker image
-    -e	create environment.xml from anaconda environment
+If the script will be called without parameters, it will run:
+    ./install.sh -p -s -b
 ```
 
 ##### Credits

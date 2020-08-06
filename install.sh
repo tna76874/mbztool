@@ -89,7 +89,7 @@ usage() {
    -h,      Print this help text
 
 If the script will be called without parameters, it will run:
-    $0 -s -c -e``
+    $0 -p -s -b``
    ">&2
     exit 1
 }
