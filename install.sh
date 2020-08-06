@@ -71,9 +71,20 @@ deploysystem() {
 # Install prerequisites (docker, docker-compose)
 # https://docs.docker.com/engine/install/ubuntu/
 prerequisites() {
-    sudo apt install curl -y
-    curl -fsSL https://get.docker.com -o "$(dirname "$0")/"get-docker.sh
-    sudo sh get-docker.sh
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg-agent \
+        software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository \
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) \
+        stable"
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install docker-ce docker-ce-cli containerd.io -qy
 }
 
 ####### Parsing arguments
