@@ -84,7 +84,10 @@ prerequisites() {
         $(lsb_release -cs) \
         stable"
     sudo apt-get update
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install docker-ce docker-ce-cli containerd.io -qy
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+        docker-ce docker-ce-cli containerd.io docker-compose
+    sudo usermod -aG docker $USER
+    sudo systemctl restart docker
 }
 
 ####### Parsing arguments

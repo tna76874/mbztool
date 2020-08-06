@@ -44,7 +44,7 @@ Convert:
 If you want to run mbztool via a docker webserver, you need docker and docker-compose installed. By running the install script, both will be installed. Also the environment and the docker-compose file gets initialized.
 
 ```bash
-./install.sh
+sudo ./install.sh
 ```
 
 Start the docker image:
