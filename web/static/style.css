@@ -7,4 +7,4 @@ h1,h2,h3,h4,h5,h6{font-family:"Segoe UI",Arial,sans-serif;font-weight:400;margin
 hr{border:0;border-top:1px solid #eee;margin:20px 0}
 .display-middle{position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}
 .display-topleft{position:absolute;left:0;top:0}.display-topright{position:absolute;right:0;top:0}
-.display-bottomleft{position:absolute;left:0;bottom:0}.display-bottomright{position:absolute;right:0;bottom:0}
+.display-bottomleft{position:absolute;left:0;bottom:0}.display-bottomright{position:absolute;right:1%;bottom:0}

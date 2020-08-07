@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <style>
+@import url("/static/style.css");
+body *, html *, input {font-family: "Raleway", sans-serif}
+input[type="file"] {font-family: "Raleway", sans-serif}
 body, html {height: 100%}
 .bgimg {
   background-image: url('/static/bgimage.jpg');
@@ -20,14 +24,15 @@ body, html {height: 100%}
         <a href="https://github.com/tna76874/mbztool" target="_blank"><img src="/static/logo.svg" alt="mbz2zip" width="170" height="100"></a>
     </div>
     <div class="display-middle">
-        <h3> select moodle-backup-file (.mbz file ending): </h3>
-        <form action = "/upload" method = "post" enctype="multipart/form-data">  
-            <input type="file" name="file" />  
+        <h3> select moodle-backup-file (.mbz file ending): </h3><br>
+        <form action = "/upload" method = "post" enctype="multipart/form-data">
+            <input type="file" name="file" /><br>
+            <br>
             <input type = "submit" value="convert">  
         </form>
     </div>
     <div class="display-bottomright">
-        <p>For details please study the <a href="https://github.com/tna76874/mbztool" target="_blank">source code</a>.</p>
+        <h4><p>For details please study the <a href="https://github.com/tna76874/mbztool" target="_blank">source code</a>.</p></h4>
     </div>
 </div>
 

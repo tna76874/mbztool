@@ -3,6 +3,9 @@ __pycache__
 install.sh
 deploy.sh
 README.md
+uploads
+downloads
+resources
 *.zip
 *.mbz
 .git

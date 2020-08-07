@@ -2,7 +2,9 @@
 
 moodle backup files extractor (mbz) - usable as command-line-tool or with a webserver
 
-<img src="web/static/logo.svg" style="zoom:500%;" /> 
+<img src="resources/demo.jpg" style="zoom:500%;" /> 
+
+#### Run as python script in command line
 
 ##### Anaconda
 
@@ -39,6 +41,8 @@ Convert:
 ./install.sh -c
 ```
 
+#### Run as webserver
+
 ##### Deploy as docker image
 
 If you want to run mbztool via a docker webserver, you need docker and docker-compose installed. By running the install script, both will be installed. Also the environment and the docker-compose file gets initialized.
@@ -70,6 +74,22 @@ If the script will be called without parameters, it will run:
     ./install.sh -p -s -b -n
 ```
 
-##### Credits
+##### Data privacy
+
+By offering this tool as a web-service it is **YOUR RESPONSIBILITY** to check for DSGVO-conformity. Check the source-code and adapt the website to your needs before deploying the web-server publicly. You are welcome to contribute to this projects or report some issues. It is strongly recommended to use the web-server behind an reverse proxy with SSL/TSL encryption (e.g. with `./install.sh -n`).
+
+The web-server has the following features:
+
+* uploaded files are processed with `mbzbot` and converted into a zip format. After this, successful or not, the uploaded file will be deleted.
+* the converted zip file will be loaded into memory, deleted from hard-disk and in the end only once offered as download.
+
+#### Credits
 
 Thanks to  https://github.com/Swarthmore/extract-mbz for the inspiration with extracting the mbz files.
+
+#### License
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
