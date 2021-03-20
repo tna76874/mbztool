@@ -60,11 +60,12 @@ docker-compose up -d
 ##### Syntax
 
 ```bash
-Usage: ./install.sh -[p|s|b|a|c|n|h]
+Usage: ./install.sh -[p|s|b|e|a|c|n|h]
 
    -p,      Install prerequisites (docker, docker-compose)
    -s,      Setup environment
    -b,      Build docker image
+   -e,      Build standalone executable
    -a,      Create anaconda environment
    -c,      Deploy mbzbot.py as system script
    -n,      Generate nginx virtual host
