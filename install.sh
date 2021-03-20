@@ -34,10 +34,12 @@ environment() {
 
     read -e -p "TCPPORT: " -i "$TCPPORT" TCPPORT
     read -e -p "DOMAIN: " -i "$DOMAIN" DOMAIN
+    read -e -p "UPLOAD LIMIT (GB): " -i "$UPLOAD_LIMIT_GB" UPLOAD_LIMIT_GB
 
     sed -i \
         -e "s#TCPPORT=.*#TCPPORT=${TCPPORT}#g" \
         -e "s#DOMAIN=.*#DOMAIN=${DOMAIN}#g" \
+        -e "s#UPLOAD_LIMIT_GB=.*#UPLOAD_LIMIT_GB=${UPLOAD_LIMIT_GB}#g" \
         "$(dirname "$0")/.env"
 }
 
@@ -104,14 +106,22 @@ prerequisites() {
     newgrp docker
 }
 
+build_executable() {
+    cd "$DIR"
+    echo -e "Ensuring requirements ..."
+    pip install -r requirements_web.txt -r requirements_build.txt -r requirements.txt > /dev/null 2>&1
+    ./build.py --web
+}
+
 ####### Parsing arguments
 #Usage print
 usage() {
-    echo "Usage: $0 -[p|s|b|a|c|n|h]" >&2
+    echo "Usage: $0 -[p|s|b|e|a|c|n|h]" >&2
     echo "
    -p,      Install prerequisites (docker, docker-compose)
    -s,      Setup environment
    -b,      Build docker image
+   -e,      Build standalone executable
    -a,      Create anaconda environment
    -c,      Deploy mbzbot.py as system script
    -n,      Generate nginx virtual host
@@ -123,7 +133,7 @@ If the script will be called without parameters, it will run:
     exit 1
 }
 
-while getopts ':psbacnh' opt
+while getopts ':psbeacnh' opt
 #putting : in the beginnnig suppresses the errors for invalid options
 do
 case "$opt" in
@@ -132,6 +142,8 @@ case "$opt" in
    's')environment;
        ;;
    'b')builddocker;
+       ;;
+   'e')build_executable;
        ;;
    'a')conda env create -f environment.yml;
        ;;
