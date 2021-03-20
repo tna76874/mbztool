@@ -57,8 +57,8 @@ class mbzbot:
                     'zipdir'    : './myspecialdirectory',   # optional: a directory the zip file is exported
                     }
         """
-        if "rootdir" in config.keys(): self.rootdir = os.path.abspath(config["rootdir"])
-        else: self.rootdir = os.getcwd()
+        
+        self.rootdir = os.getcwd()
         self.extractroot = os.path.abspath(self.rootdir + '/extract')
         self.extractdir = None
         self.exportroot = os.path.abspath(self.rootdir + '/export')
@@ -67,6 +67,8 @@ class mbzbot:
         if config!=None:
             if 'zipdir' in config.keys():
                 self.zipdir = os.path.abspath(config['zipdir'])
+            if 'rootdir' in config.keys():
+                self.rootdir = os.path.abspath(config["rootdir"])
             self.extractmbz(os.path.splitext(os.path.abspath(config['file']))[0]+'.mbz')
         else:
             self.parser = argparse.ArgumentParser()
