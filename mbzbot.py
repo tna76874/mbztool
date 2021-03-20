@@ -57,7 +57,8 @@ class mbzbot:
                     'zipdir'    : './myspecialdirectory',   # optional: a directory the zip file is exported
                     }
         """
-        self.rootdir = os.getcwd()
+        if "rootdir" in config.keys(): self.rootdir = os.path.abspath(config["rootdir"])
+        else: self.rootdir = os.getcwd()
         self.extractdir = os.path.abspath(self.rootdir + '/extract')
         self.exportdir = os.path.abspath(self.rootdir + '/export')
         self.zipdir = None
@@ -172,7 +173,7 @@ class mbzbot:
         DF_assign = DF_files[DF_files['component'].str.contains('assign')]
         for i in DF_assign.index:
             try:
-                name = DF_assign.loc[i,'firstname'].replace(' ','_')+'_'+DF_assign.loc[i,'lastname']
+                name = DF_assign.loc[i,'lastname'].replace(' ','_')+'_'+DF_assign.loc[i,'firstname']
                 assignment = DF_assign.loc[i,'name']
                 hashval = DF_assign.loc[i,'contenthash'][:5]
                 folderpath = os.path.join(os.path.abspath(self.exportdir), 'assign' , assignment, name)

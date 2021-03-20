@@ -69,8 +69,8 @@ else:
 # Initialize Flask app
 app = Flask(__name__,
             static_url_path='', 
-            static_folder='web/static',
-            template_folder='web/templates')  
+            static_folder="{:}web/static".format(TEMPLATES),
+            template_folder="{:}web/templates".format(TEMPLATES))
 
 app.config['UPLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/uploads")
 app.config['DOWNLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/downloads")
@@ -125,7 +125,7 @@ def success():
             convertpath = os.path.splitext(os.path.basename(savepath))[0]+'.zip'
             f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             try:
-                mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER']})
+                mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER'], 'rootdir': ROOT_DIR})
                 os.remove(savepath)
             except:
                 os.remove(savepath)
