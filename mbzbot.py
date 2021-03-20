@@ -182,12 +182,12 @@ class mbzbot:
                 shutil.move(os.path.abspath(folderpath+'/'+DF_assign.loc[i,'filen']),os.path.abspath(folderpath+'/'+hashval+'_'+DF_assign.loc[i,'filename']))
             except: pass
 
-#        # delete the extracted mbz files
-#        shutil.rmtree(self.extractdir)
-#        # zip all extracted files into one file
-#        shutil.make_archive(os.path.abspath(self.zipdir + '/' + os.path.splitext(os.path.basename(zfile))[0]), 'zip', self.exportdir)
-#        # delete the extracted files and have only the zip file left
-#        shutil.rmtree(self.exportdir)
+        # delete the extracted mbz files
+        shutil.rmtree(self.extractdir)
+        # zip all extracted files into one file
+        shutil.make_archive(os.path.abspath(self.zipdir + '/' + os.path.splitext(os.path.basename(zfile))[0]), 'zip', self.exportdir)
+        # delete the extracted files and have only the zip file left
+        shutil.rmtree(self.exportdir)
 
 if __name__ == "__main__":
     # if runn locally, import argparse and use mbzbot as an command-line tool

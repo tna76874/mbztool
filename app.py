@@ -55,7 +55,7 @@ app = Flask(__name__,
 
 app.config['UPLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/uploads")
 app.config['DOWNLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/downloads")
-app.config['MAX_CONTENT_LENGTH'] = 150 * 1024 * 1024 # 150MB Limit
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024 # 2GB Limit
 app.config["ALLOWED_EXTENSIONS"] = ["MBZ"]
 
 # create mandatory folders, of not exist

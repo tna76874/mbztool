@@ -1,7 +1,11 @@
 #!/bin/bash
+## Define paths
+SCRIPT=$(readlink -f "$0")
+DIR=$(dirname "$SCRIPT")
+
 ## Define some functions
 function generatePassword() {
-    openssl rand -hex 16
+    tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 64
 }
 
 confirm() {
@@ -67,7 +71,8 @@ fi
 
 # Build docker image
 builddocker() {
-    docker build -t tna76874/mbztool:latest "$(dirname "$0")"
+    cd "$DIR"
+    docker-compose build --pull --no-cache
 }
 
 # Deploy mbzbot.py as system script

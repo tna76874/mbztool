@@ -5,7 +5,9 @@ LABEL maintainer="dev@hilberg.eu"
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
+COPY requirements_web.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_web.txt
 
 COPY . .
 

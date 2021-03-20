@@ -8,6 +8,6 @@ dependencies:
       - glob2
       - colorama
       - sqlalchemy
-      - numpy==1.18.4
-      - pandas==1.0.3
+      - numpy
+      - pandas
       - pandas_read_xml
