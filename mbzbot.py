@@ -107,7 +107,6 @@ class mbzbot:
             return -1
         mbz['content'].extractall(destination)
 
-
     def extractmbz(self,zfile):
         """
         extract files to human readable format from moodle backup files
@@ -117,43 +116,78 @@ class mbzbot:
 
         DF_files = pdx.read_xml(os.path.abspath(self.extractdir + "/files.xml"), ['files','file'])
         DF_files = DF_files[DF_files['mimetype']!='$@NULL@$']
+        
+        DF_user = pdx.read_xml(os.path.abspath(self.extractdir + "/users.xml"), ['users','user']).rename(columns = {'@contextid':'contextid','@id':'id2'})
+        DF_user = DF_user[[
+                            'id2',
+                            'username',
+                            'email',
+                            'firstname',
+                            'lastname'
+                            ]]
 
         DF_things = pd.DataFrame({'path':glob2.glob(self.extractdir+"/**/*")})
 
         DF_things.loc[:,'path'] = DF_things.loc[:,'path'].apply(lambda x: os.path.abspath(x))
         DF_things.loc[:,'filen'] = DF_things.loc[:,'path'].apply(lambda x: os.path.basename(x))
 
-        # glob file metadata
+        # item: recources
         DF_resource = pd.DataFrame()
         for i in DF_things[DF_things['filen']=='resource.xml']['path']:
             DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id2'})
             DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['resource']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
             DF_tmp.drop(columns=['resource','@id','timemodified'],inplace=True)
             DF_resource = pd.concat([DF_resource,DF_tmp])
-
-        DF_files = pd.merge(DF_files,DF_resource,on="contextid")
+            
+        # item: assignments
+        DF_assign = pd.DataFrame()
+        for i in DF_things[DF_things['filen']=='assign.xml']['path']:
+            DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id2'})
+            DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['assign']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
+            DF_tmp.drop(columns=['assign','@id','timemodified'],inplace=True)
+            DF_assign = pd.concat([DF_assign,DF_tmp])
+        
+        # merge item informations
+        DF_items = pd.concat([DF_assign,DF_resource])
+        DF_files = pd.merge(DF_files,DF_items,on="contextid")
         DF_files = pd.merge(DF_files,DF_things,left_on="contenthash",right_on="filen",how="outer")
+        DF_files = pd.merge(DF_files,DF_user,left_on="userid",right_on="id2")
 
-        #create folder structure
+        #convert course files
         for i in DF_things[DF_things['filen']=='section.xml']['path']:
             DF_resource = pdx.read_xml(i).T.reset_index(drop=True)
             try:
                 DF_filescopy = DF_files[DF_files['@moduleid'].isin(DF_resource['sequence'].str.split(',')[0])]
+                DF_filescopy = DF_filescopy[~DF_filescopy['component'].str.contains('assign')]
                 foldername = "%.2d"%DF_resource['number']+'_'+DF_resource['name'][0].replace(' ','_')
-                folderpath = os.path.abspath(self.exportdir + '/' + foldername)
+                folderpath = os.path.join(os.path.abspath(self.exportdir), 'course' , foldername)
                 if not os.path.exists(folderpath):
                     os.makedirs(folderpath)
                 for j in DF_filescopy.index:
                     shutil.copy(DF_filescopy.loc[j,'path'],folderpath)
                     shutil.move(os.path.abspath(folderpath+'/'+DF_filescopy.loc[j,'filen']),os.path.abspath(folderpath+'/'+DF_filescopy.loc[j,'filen'][:4] + '_' + DF_filescopy.loc[j,'filename']))
             except: pass
+        
+        #convert assignment files
+        DF_assign = DF_files[DF_files['component'].str.contains('assign')]
+        for i in DF_assign.index:
+            try:
+                name = DF_assign.loc[i,'firstname'].replace(' ','_')+'_'+DF_assign.loc[i,'lastname']
+                assignment = DF_assign.loc[i,'name']
+                hashval = DF_assign.loc[i,'contenthash'][:5]
+                folderpath = os.path.join(os.path.abspath(self.exportdir), 'assign' , assignment, name)
+                if not os.path.exists(folderpath):
+                    os.makedirs(folderpath)
+                shutil.copy(DF_assign.loc[i,'path'],folderpath)
+                shutil.move(os.path.abspath(folderpath+'/'+DF_assign.loc[i,'filen']),os.path.abspath(folderpath+'/'+hashval+'_'+DF_assign.loc[i,'filename']))
+            except: pass
 
-        # delete the extracted mbz files
-        shutil.rmtree(self.extractdir)
-        # zip all extracted files into one file
-        shutil.make_archive(os.path.abspath(self.zipdir + '/' + os.path.splitext(os.path.basename(zfile))[0]), 'zip', self.exportdir)
-        # delete the extracted files and have only the zip file left
-        shutil.rmtree(self.exportdir)
+#        # delete the extracted mbz files
+#        shutil.rmtree(self.extractdir)
+#        # zip all extracted files into one file
+#        shutil.make_archive(os.path.abspath(self.zipdir + '/' + os.path.splitext(os.path.basename(zfile))[0]), 'zip', self.exportdir)
+#        # delete the extracted files and have only the zip file left
+#        shutil.rmtree(self.exportdir)
 
 if __name__ == "__main__":
     # if runn locally, import argparse and use mbzbot as an command-line tool
