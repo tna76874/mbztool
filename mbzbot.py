@@ -59,8 +59,10 @@ class mbzbot:
         """
         if "rootdir" in config.keys(): self.rootdir = os.path.abspath(config["rootdir"])
         else: self.rootdir = os.getcwd()
-        self.extractdir = os.path.abspath(self.rootdir + '/extract')
-        self.exportdir = os.path.abspath(self.rootdir + '/export')
+        self.extractroot = os.path.abspath(self.rootdir + '/extract')
+        self.extractdir = None
+        self.exportroot = os.path.abspath(self.rootdir + '/export')
+        self.exportdir = None
         self.zipdir = None
         if config!=None:
             if 'zipdir' in config.keys():
@@ -81,7 +83,7 @@ class mbzbot:
 
     def unzip(self,mbz_filepath,destination):
         """
-        unzip a file to a certein destination
+        unzip a file to a certain destination
         """
         # mbz dict contains information about the mbz file
         mbz = dict()
@@ -112,9 +114,21 @@ class mbzbot:
         """
         extract files to human readable format from moodle backup files
         """
+        self.extractdir=os.path.join(self.extractroot,os.path.basename(zfile))
+        self.exportdir=os.path.join(self.exportroot,os.path.basename(zfile))
+
+        # ensure clean working directories
+        for i in [self.extractdir, self.exportdir]:
+            if os.path.exists(i): shutil.rmtree(i)
+            os.makedirs(i)
+        
+        # unzip mbz file
         self.unzip(zfile,self.extractdir)
+
+        # define savepath for zip file
         if self.zipdir==None: self.zipdir = os.path.dirname(os.path.abspath(zfile))
 
+        # extracting data
         DF_files = pdx.read_xml(os.path.abspath(self.extractdir + "/files.xml"), ['files','file'])
         DF_files = DF_files[DF_files['mimetype']!='$@NULL@$']
         
