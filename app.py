@@ -43,9 +43,28 @@ __status__ = "Prototype"
 
 import os
 import io
+import sys
 from flask import *  
 from werkzeug.utils import secure_filename
 from mbzbot import mbzbot
+
+# Read env vars
+## root folder
+if hasattr(sys, '_MEIPASS'):
+    ROOT_DIR = os.path.abspath(sys._MEIPASS)
+    print('ENTERING FROZEN MODE. TEMP DIR: {:}'.format(ROOT_DIR))
+    TEMPLATES = ROOT_DIR + '/'
+else:
+    ROOT_DIR = os.getcwd()
+    TEMPLATES = ''
+
+## upload limit
+if hasattr(sys, 'UPLOAD_LIMIT_GB'):
+    UPLOAD_LIMIT_GB = int(os.path.abspath(sys.UPLOAD_LIMIT_GB)* 1024 * 1024 * 1024)
+elif hasattr(sys, '_MEIPASS'):
+    UPLOAD_LIMIT_GB = 5 * 1024 * 1024 * 1024 # 5GB
+else:
+    UPLOAD_LIMIT_GB = 150 * 1024 * 1024 # 150MB
 
 # Initialize Flask app
 app = Flask(__name__,
@@ -53,9 +72,9 @@ app = Flask(__name__,
             static_folder='web/static',
             template_folder='web/templates')  
 
-app.config['UPLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/uploads")
-app.config['DOWNLOAD_FOLDER'] = os.path.abspath(os.getcwd()+"/downloads")
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024 # 2GB Limit
+app.config['UPLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/uploads")
+app.config['DOWNLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/downloads")
+app.config['MAX_CONTENT_LENGTH'] = UPLOAD_LIMIT_GB
 app.config["ALLOWED_EXTENSIONS"] = ["MBZ"]
 
 # create mandatory folders, of not exist
@@ -133,7 +152,12 @@ def download_file(filename):
 
     return send_file(return_data, mimetype='application/zip',
                      attachment_filename=filename)
+
+    
   
 if __name__ == '__main__':
-    # Run Flask-app and bind the web-server to 0.0.0.0
-    app.run(debug = True,host='0.0.0.0')  
+    import webbrowser, threading
+    import time
+    URL = "http://localhost:5000"
+    threading.Timer(1, lambda: webbrowser.open(URL, new = 2) ).start()
+    app.run(debug = False, host='localhost')
