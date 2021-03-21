@@ -68,21 +68,11 @@ elif hasattr(sys, '_MEIPASS'):
 else:
     UPLOAD_LIMIT_GB = 150 * 1024 * 1024 # 150MB
 
-# Initialize Flask app
-app = Flask(__name__,
-            static_url_path='', 
-            static_folder="{:}web/static".format(TEMPLATES),
-            template_folder="{:}web/templates".format(TEMPLATES))
-
-app.config['UPLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/uploads")
-app.config['DOWNLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/downloads")
-app.config['MAX_CONTENT_LENGTH'] = UPLOAD_LIMIT_GB
-app.config["ALLOWED_EXTENSIONS"] = ["MBZ"]
-
-# create mandatory folders, of not exist
-for i in ['UPLOAD_FOLDER','DOWNLOAD_FOLDER']:
-    if not os.path.exists(app.config[i]):
-        os.makedirs(app.config[i])
+# define some functions
+def read_version():
+    with open(os.path.join(ROOT_DIR,'VERSION')) as f:
+        lines = [line.rstrip() for line in f]
+    return lines
 
 def allowed_types(filename):
     """
@@ -98,12 +88,35 @@ def allowed_types(filename):
     else:
         return False
 
+# Initialize Flask app
+app = Flask(__name__,
+            static_url_path='', 
+            static_folder="{:}web/static".format(TEMPLATES),
+            template_folder="{:}web/templates".format(TEMPLATES))
+
+app.config['UPLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/uploads")
+app.config['DOWNLOAD_FOLDER'] = os.path.abspath(ROOT_DIR+"/downloads")
+app.config['MAX_CONTENT_LENGTH'] = UPLOAD_LIMIT_GB
+app.config["ALLOWED_EXTENSIONS"] = ["MBZ"]
+app.config["SOURCE"] = "https://github.com/tna76874/mbztool"
+app.config["VERSION"] = read_version()
+app.config["SOURCE_URL_DESCRIPTION"] = "git-{}-{}".format(app.config["VERSION"][1],app.config["VERSION"][0][:4])
+
+# create mandatory folders, of not exist
+for i in ['UPLOAD_FOLDER','DOWNLOAD_FOLDER']:
+    if not os.path.exists(app.config[i]):
+        os.makedirs(app.config[i])
+
+# routings
 @app.route('/')  
 def upload():
     """
     return 'index.html' when access '/'
     """
-    return render_template("index.html")
+    return render_template("index.html",
+                            SOURCE_URL=app.config["SOURCE"],
+                            SOURCE_URL_DESCRIPTION=app.config["SOURCE_URL_DESCRIPTION"],
+                            THIS_COMMIT=app.config["VERSION"][0])
 
 @app.route('/favicon.ico')
 def favicon():

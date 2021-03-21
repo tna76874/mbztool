@@ -6,10 +6,13 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 COPY requirements_web.txt ./
+COPY requirements_build.txt ./
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt -r requirements_web.txt
+RUN pip install --no-cache-dir -r requirements.txt -r requirements_web.txt -r requirements_build.txt
 
 COPY . .
+
+RUN python build.py -v && rm -rf /usr/src/app/.git
 
 EXPOSE 5000
 

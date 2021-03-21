@@ -6,7 +6,7 @@ extract
 docker-compose.yml
 .env
 get-docker.sh
-
+VERSION
 
 build
 dist

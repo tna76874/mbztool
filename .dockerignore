@@ -1,3 +1,4 @@
+
 Dockerfile
 __pycache__
 install.sh
@@ -8,8 +9,8 @@ downloads
 resources
 *.zip
 *.mbz
-.git
 .gitignore
 docker-compose.yml
 *.example
 .env
+VERSION
