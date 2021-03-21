@@ -7,7 +7,7 @@ MBZ moodle converter
 __author__ = "tna76874"
 __credits__ = ["https://github.com/Swarthmore/extract-mbz"]
 __license__ = "GPL"
-__version__ = "0.1"
+__version__ = "0.3"
 __maintainer__ = "tna76874"
 __email__ = "dev@hilberg.eu"
 __status__ = "Prototype"
@@ -163,14 +163,18 @@ class mbzbot:
             DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['assign']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
             DF_tmp.drop(columns=['assign','@id','timemodified'],inplace=True)
             DF_assign = pd.concat([DF_assign,DF_tmp])
-        
+       
         # merge item informations
         DF_items = pd.concat([DF_assign,DF_resource])
         DF_files = pd.merge(DF_files,DF_items,on="contextid")
         DF_files = pd.merge(DF_files,DF_things,left_on="contenthash",right_on="filen",how="outer")
+        
+        # Dataframes to work with
+        DF_feedback = DF_files[DF_files['filearea']=='download'].rename(columns = {'@contextid':'contextid','@id':'id1'})
         DF_files = pd.merge(DF_files,DF_user,left_on="userid",right_on="id2")
-
-        #convert course files
+        DF_assign = DF_files[DF_files['component'].str.contains('assign')]
+        
+        # convert course files
         for i in DF_things[DF_things['filen']=='section.xml']['path']:
             DF_resource = pdx.read_xml(i).T.reset_index(drop=True)
             try:
@@ -185,8 +189,7 @@ class mbzbot:
                     shutil.move(os.path.abspath(folderpath+'/'+DF_filescopy.loc[j,'filen']),os.path.abspath(folderpath+'/'+DF_filescopy.loc[j,'filen'][:4] + '_' + DF_filescopy.loc[j,'filename']))
             except: pass
         
-        #convert assignment files
-        DF_assign = DF_files[DF_files['component'].str.contains('assign')]
+        # convert assignment files
         for i in DF_assign.index:
             try:
                 name = DF_assign.loc[i,'lastname'].replace(' ','_')+'_'+DF_assign.loc[i,'firstname']
@@ -198,7 +201,20 @@ class mbzbot:
                 shutil.copy(DF_assign.loc[i,'path'],folderpath)
                 shutil.move(os.path.abspath(folderpath+'/'+DF_assign.loc[i,'filen']),os.path.abspath(folderpath+'/'+hashval+'_'+DF_assign.loc[i,'filename']))
             except: pass
-
+        
+        # convert feedbacks
+        for i in DF_feedback.index:
+            try:
+                name = DF_feedback.loc[i,'filename'].split(".")[0]
+                assignment = DF_feedback.loc[i,'name']
+                hashval = DF_feedback.loc[i,'contenthash'][:5]
+                folderpath = os.path.join(os.path.abspath(self.exportdir), 'feedback' , assignment, name)
+                if not os.path.exists(folderpath):
+                    os.makedirs(folderpath)
+                shutil.copy(DF_feedback.loc[i,'path'],folderpath)
+                shutil.move(os.path.abspath(folderpath+'/'+DF_feedback.loc[i,'filen']),os.path.abspath(folderpath+'/'+hashval+'_'+DF_feedback.loc[i,'filename']))
+            except: pass
+            
         # delete the extracted mbz files
         shutil.rmtree(self.extractdir)
         # zip all extracted files into one file

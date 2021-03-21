@@ -17,7 +17,7 @@ key = str(secrets.token_urlsafe(32))
 # optmize level
 optimize=1
 # version
-version="0.2"
+version="0.3"
 
 def generate_version():
     local_repo = git.Repo(".")
