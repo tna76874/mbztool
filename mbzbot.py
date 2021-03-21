@@ -69,6 +69,8 @@ class mbzbot:
                 self.zipdir = os.path.abspath(config['zipdir'])
             if 'rootdir' in config.keys():
                 self.rootdir = os.path.abspath(config["rootdir"])
+                self.extractroot = os.path.abspath(self.rootdir + '/extract')
+                self.exportroot = os.path.abspath(self.rootdir + '/export')
             self.extractmbz(os.path.splitext(os.path.abspath(config['file']))[0]+'.mbz')
         else:
             self.parser = argparse.ArgumentParser()
