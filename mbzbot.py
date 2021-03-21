@@ -157,7 +157,29 @@ class mbzbot:
             DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['resource']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
             DF_tmp.drop(columns=['resource','@id','timemodified'],inplace=True)
             DF_resource = pd.concat([DF_resource,DF_tmp])
-            
+
+        # item: grades
+        DF_grade = pd.DataFrame()
+        for i in DF_things[DF_things['filen']=='grades.xml']['path']:
+            try:
+                DF_tmp = pdx.read_xml(i,['activity_gradebook','grade_items']).T.rename(columns = {'@contextid':'contextid','@id':'id2'}).reset_index(drop=True)
+                # DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['assign']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
+                # DF_tmp.drop(columns=['assign','@id','timemodified'],inplace=True)
+                DF_grade = pd.concat([DF_grade,DF_tmp])
+            except: pass
+        DF_grade.reset_index(drop=True,inplace=True)
+        DF_grades = pd.DataFrame()
+        DF_grades['id_assign'] = np.nan
+        for i in DF_grade.index:
+            DF_tmp = pd.DataFrame.from_dict(DF_grade.loc[i,'grade_grades']['grade_grade']).reset_index(drop=True).rename(columns = {'@contextid':'contextid','@id':'id2'})
+            DF_tmp['id_assign'] = DF_grade.loc[i,'id2']
+            DF_grades = pd.concat([DF_grades,DF_tmp])
+        DF_grades.reset_index(drop=True,inplace=True)
+        DF_grades = pd.merge(DF_grade,DF_grades,left_on="id2",right_on="id_assign")
+        DF_grades = pd.merge(DF_grades,DF_user,left_on="userid",right_on="id2")
+        DF_grades = DF_grades[['itemname','username', 'email', 'firstname', 'lastname', 'rawgrade', 'finalgrade','feedback']]
+        DF_grades.replace("$@NULL@$",'---',inplace=True)
+
         # item: assignments
         DF_assign = pd.DataFrame()
         for i in DF_things[DF_things['filen']=='assign.xml']['path']:
@@ -216,6 +238,18 @@ class mbzbot:
                 shutil.copy(DF_feedback.loc[i,'path'],folderpath)
                 shutil.move(os.path.abspath(folderpath+'/'+DF_feedback.loc[i,'filen']),os.path.abspath(folderpath+'/'+hashval+'_'+DF_feedback.loc[i,'filename']))
             except: pass
+        
+        # convert gradings
+        for i in DF_grades.index:
+            # try:
+            name = DF_grades.loc[i,'lastname'].replace(' ','_')+'_'+DF_grades.loc[i,'firstname']
+            assignment = DF_grades.loc[i,'itemname']
+            folderpath = os.path.join(os.path.abspath(self.exportdir), 'assign' , assignment, name)
+            if not os.path.exists(folderpath):
+                os.makedirs(folderpath)
+            with open(os.path.join(folderpath,'rating.html'), mode='wt', encoding='utf-8') as f:
+                f.write("{:}\n\nRating:{:}".format(DF_grades.loc[i,'feedback'],DF_grades.loc[i,'finalgrade']))
+            # except: pass
             
         # delete the extracted mbz files
         shutil.rmtree(self.extractdir)
