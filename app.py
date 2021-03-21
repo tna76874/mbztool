@@ -60,9 +60,9 @@ else:
 
 ## upload limit
 if hasattr(sys, 'UPLOAD_LIMIT_GB'):
-    UPLOAD_LIMIT_GB = int(int(os.path.abspath(sys.UPLOAD_LIMIT_GB))* 1024 * 1024 * 1024)
+    UPLOAD_LIMIT_GB = int(float(os.path.abspath(sys.UPLOAD_LIMIT_GB))* 1024 * 1024 * 1024)
 elif os.getenv("UPLOAD_LIMIT_GB") != None:
-    UPLOAD_LIMIT_GB = int(int(os.getenv("UPLOAD_LIMIT_GB"))* 1024 * 1024 * 1024)
+    UPLOAD_LIMIT_GB = int(float(os.getenv("UPLOAD_LIMIT_GB")) * 1024 * 1024 * 1024)
 elif hasattr(sys, '_MEIPASS'):
     UPLOAD_LIMIT_GB = 5 * 1024 * 1024 * 1024 # 5GB
 else:
