@@ -229,15 +229,19 @@ class mbzbot:
             except: pass
         DF_grade.reset_index(drop=True,inplace=True)
         DF_grades = pd.DataFrame()
+        DF_grades['id_assignment'] = np.nan
         for i in DF_grade.index:
-            DF_tmp = pd.DataFrame.from_dict(DF_grade.loc[i,'grade_grades']['grade_grade']).reset_index(drop=True).rename(columns = {'@contextid':'contextid','@id':'id_grades'})
-            DF_tmp['id_assignment'] = DF_grade.loc[i,'id_assignment']
-            DF_grades = pd.concat([DF_grades,DF_tmp])
-        DF_grades.reset_index(drop=True,inplace=True)
-        DF_grades = pd.merge(DF_grade,DF_grades, on="id_assignment")
-        DF_grades = pd.merge(DF_grades,DF_user,left_on="userid",right_on="id_user")
-        DF_grades = DF_grades[['itemname','username', 'email', 'firstname', 'lastname', 'rawgrade', 'finalgrade','feedback','userid']]
-        DF_grades.replace("$@NULL@$",'---',inplace=True)
+            try:
+                DF_tmp = pd.DataFrame.from_dict(DF_grade.loc[i,'grade_grades']['grade_grade']).reset_index(drop=True).rename(columns = {'@contextid':'contextid','@id':'id_grades'})
+                DF_tmp['id_assignment'] = DF_grade.loc[i,'id_assignment']
+                DF_grades = pd.concat([DF_grades,DF_tmp])
+            except: pass
+        if len(DF_grades) > 0:
+            DF_grades.reset_index(drop=True,inplace=True)
+            DF_grades = pd.merge(DF_grade,DF_grades, on="id_assignment")
+            DF_grades = pd.merge(DF_grades,DF_user,left_on="userid",right_on="id_user")
+            DF_grades = DF_grades[['itemname','username', 'email', 'firstname', 'lastname', 'rawgrade', 'finalgrade','feedback','userid']]
+            DF_grades.replace("$@NULL@$",'---',inplace=True)
 
         # item: assignments
         DF_assign = pd.DataFrame()
@@ -251,19 +255,19 @@ class mbzbot:
         DF_items = pd.concat([DF_assign,DF_resource])
         DF_files = pd.merge(DF_files,DF_items,on="contextid")
         DF_files = pd.merge(DF_files,DF_things,left_on="contenthash",right_on="filen",how="outer")
-        # DF_files = DF_files[['userid',
-        #                      '@id',
-        #                      'filearea',
-        #                      'contextid',
-        #                      'filen',
-        #                      'contenthash',
-        #                      'name',
-        #                      'path',
-        #                      '@moduleid',
-        #                      'id_assignment',
-        #                      'filename',
-        #                      'component',
-        #                      'filepath']]
+        DF_files = DF_files[['userid',
+                              '@id',
+                              'filearea',
+                              'contextid',
+                              'filen',
+                              'contenthash',
+                              'name',
+                              'path',
+                              '@moduleid',
+                              'id_assignment',
+                              'filename',
+                              'component',
+                              'filepath']]
         
         # Dataframes to work with
         DF_feedback = DF_files[DF_files['filearea']=='download'].rename(columns = {'@contextid':'contextid','@id':'id_feedback'})
