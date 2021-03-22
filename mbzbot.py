@@ -132,13 +132,13 @@ class mbzbot:
         # define savepath for zip file
         if self.zipdir==None: self.zipdir = os.path.dirname(os.path.abspath(zfile))
 
-        # extracting data
+        ## Parse data from xml-files
         DF_files = pdx.read_xml(os.path.abspath(self.extractdir + "/files.xml"), ['files','file'])
         DF_files = DF_files[DF_files['mimetype']!='$@NULL@$']
         
-        DF_user = pdx.read_xml(os.path.abspath(self.extractdir + "/users.xml"), ['users','user']).rename(columns = {'@contextid':'contextid','@id':'id2'})
+        DF_user = pdx.read_xml(os.path.abspath(self.extractdir + "/users.xml"), ['users','user']).rename(columns = {'@contextid':'contextid','@id':'id_user'})
         DF_user = DF_user[[
-                            'id2',
+                            'id_user',
                             'username',
                             'email',
                             'firstname',
@@ -153,7 +153,7 @@ class mbzbot:
         # item: recources
         DF_resource = pd.DataFrame()
         for i in DF_things[DF_things['filen']=='resource.xml']['path']:
-            DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id2'})
+            DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id_resource'})
             DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['resource']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
             DF_tmp.drop(columns=['resource','@id','timemodified'],inplace=True)
             DF_resource = pd.concat([DF_resource,DF_tmp])
@@ -162,28 +162,27 @@ class mbzbot:
         DF_grade = pd.DataFrame()
         for i in DF_things[DF_things['filen']=='grades.xml']['path']:
             try:
-                DF_tmp = pdx.read_xml(i,['activity_gradebook','grade_items']).T.rename(columns = {'@contextid':'contextid','@id':'id2'}).reset_index(drop=True)
+                DF_tmp = pdx.read_xml(i,['activity_gradebook','grade_items']).T.rename(columns = {'@contextid':'contextid','@id':'id_assignment'}).reset_index(drop=True)
                 # DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['assign']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
                 # DF_tmp.drop(columns=['assign','@id','timemodified'],inplace=True)
                 DF_grade = pd.concat([DF_grade,DF_tmp])
             except: pass
         DF_grade.reset_index(drop=True,inplace=True)
         DF_grades = pd.DataFrame()
-        DF_grades['id_assign'] = np.nan
         for i in DF_grade.index:
-            DF_tmp = pd.DataFrame.from_dict(DF_grade.loc[i,'grade_grades']['grade_grade']).reset_index(drop=True).rename(columns = {'@contextid':'contextid','@id':'id2'})
-            DF_tmp['id_assign'] = DF_grade.loc[i,'id2']
+            DF_tmp = pd.DataFrame.from_dict(DF_grade.loc[i,'grade_grades']['grade_grade']).reset_index(drop=True).rename(columns = {'@contextid':'contextid','@id':'id_grades'})
+            DF_tmp['id_assignment'] = DF_grade.loc[i,'id_assignment']
             DF_grades = pd.concat([DF_grades,DF_tmp])
         DF_grades.reset_index(drop=True,inplace=True)
-        DF_grades = pd.merge(DF_grade,DF_grades,left_on="id2",right_on="id_assign")
-        DF_grades = pd.merge(DF_grades,DF_user,left_on="userid",right_on="id2")
-        DF_grades = DF_grades[['itemname','username', 'email', 'firstname', 'lastname', 'rawgrade', 'finalgrade','feedback']]
+        DF_grades = pd.merge(DF_grade,DF_grades, on="id_assignment")
+        DF_grades = pd.merge(DF_grades,DF_user,left_on="userid",right_on="id_user")
+        DF_grades = DF_grades[['itemname','username', 'email', 'firstname', 'lastname', 'rawgrade', 'finalgrade','feedback','userid']]
         DF_grades.replace("$@NULL@$",'---',inplace=True)
 
         # item: assignments
         DF_assign = pd.DataFrame()
         for i in DF_things[DF_things['filen']=='assign.xml']['path']:
-            DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id2'})
+            DF_tmp = pdx.read_xml(i).T.rename(columns = {'@contextid':'contextid','@id':'id_assignment'})
             DF_tmp = pd.concat([DF_tmp.reset_index(drop=True),pd.DataFrame.from_dict(dict(DF_tmp['assign']['activity']),orient='index').T.reset_index(drop=True)],axis=1,sort=False)
             DF_tmp.drop(columns=['assign','@id','timemodified'],inplace=True)
             DF_assign = pd.concat([DF_assign,DF_tmp])
@@ -192,12 +191,28 @@ class mbzbot:
         DF_items = pd.concat([DF_assign,DF_resource])
         DF_files = pd.merge(DF_files,DF_items,on="contextid")
         DF_files = pd.merge(DF_files,DF_things,left_on="contenthash",right_on="filen",how="outer")
+        DF_files = DF_files[['id_resource',
+                             'userid',
+                             '@id',
+                             'filearea',
+                             'contextid',
+                             'filen',
+                             'contenthash',
+                             'name',
+                             'path',
+                             '@moduleid',
+                             'id_assignment',
+                             'filename',
+                             'component',
+                             'filepath']]
         
         # Dataframes to work with
-        DF_feedback = DF_files[DF_files['filearea']=='download'].rename(columns = {'@contextid':'contextid','@id':'id1'})
-        DF_files = pd.merge(DF_files,DF_user,left_on="userid",right_on="id2")
-        DF_assign = DF_files[DF_files['component'].str.contains('assign')]
+        DF_feedback = DF_files[DF_files['filearea']=='download'].rename(columns = {'@contextid':'contextid','@id':'id_feedback'})
+        DF_files = pd.merge(DF_files,DF_user,left_on="userid",right_on="id_user")
+        DF_assign = DF_files[DF_files['component'].str.contains('assign')].rename(columns = {'@contextid':'contextid','@id':'id_assign'})
         
+        
+        ## Converting files
         # convert course files
         for i in DF_things[DF_things['filen']=='section.xml']['path']:
             DF_resource = pdx.read_xml(i).T.reset_index(drop=True)
@@ -241,15 +256,15 @@ class mbzbot:
         
         # convert gradings
         for i in DF_grades.index:
-            # try:
-            name = DF_grades.loc[i,'lastname'].replace(' ','_')+'_'+DF_grades.loc[i,'firstname']
-            assignment = DF_grades.loc[i,'itemname']
-            folderpath = os.path.join(os.path.abspath(self.exportdir), 'assign' , assignment, name)
-            if not os.path.exists(folderpath):
-                os.makedirs(folderpath)
-            with open(os.path.join(folderpath,'rating.html'), mode='wt', encoding='utf-8') as f:
-                f.write("{:}\n\nRating:{:}".format(DF_grades.loc[i,'feedback'],DF_grades.loc[i,'finalgrade']))
-            # except: pass
+            try:
+                name = DF_grades.loc[i,'lastname'].replace(' ','_')+'_'+DF_grades.loc[i,'firstname']
+                assignment = DF_grades.loc[i,'itemname']
+                folderpath = os.path.join(os.path.abspath(self.exportdir), 'assign' , assignment, name)
+                if not os.path.exists(folderpath):
+                    os.makedirs(folderpath)
+                with open(os.path.join(folderpath,'rating.html'), mode='wt', encoding='utf-8') as f:
+                    f.write("{:}\n\nRating:{:}".format(DF_grades.loc[i,'feedback'],DF_grades.loc[i,'finalgrade']))
+            except: pass
             
         # delete the extracted mbz files
         shutil.rmtree(self.extractdir)
