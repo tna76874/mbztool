@@ -66,7 +66,7 @@ elif os.getenv("UPLOAD_LIMIT_GB") != None:
 elif hasattr(sys, '_MEIPASS'):
     UPLOAD_LIMIT_GB = 5 * 1024 * 1024 * 1024 # 5GB
 else:
-    UPLOAD_LIMIT_GB = 150 * 1024 * 1024 # 150MB
+    UPLOAD_LIMIT_GB = 5 * 1024 * 1024 * 1024 # 5GB
 
 # define some functions
 def read_version():
@@ -135,12 +135,18 @@ def success():
     if request.method == 'POST':  
         f = request.files['file']
         filename = secure_filename(f.filename)
+
+        if request.form.get('compress')=='yes':
+            compress = True
+        else:
+            compress = False
+
         if allowed_types(filename):
             savepath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
             convertpath = os.path.splitext(os.path.basename(savepath))[0]+'.zip'
             f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             try:
-                mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER'], 'rootdir': ROOT_DIR})
+                mbzbot({'file':savepath,'zipdir':app.config['DOWNLOAD_FOLDER'], 'rootdir': ROOT_DIR, 'compress': compress, })
                 os.remove(savepath)
             except:
                 os.remove(savepath)
