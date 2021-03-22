@@ -251,8 +251,7 @@ class mbzbot:
         DF_items = pd.concat([DF_assign,DF_resource])
         DF_files = pd.merge(DF_files,DF_items,on="contextid")
         DF_files = pd.merge(DF_files,DF_things,left_on="contenthash",right_on="filen",how="outer")
-        DF_files = DF_files[['id_resource',
-                             'userid',
+        DF_files = DF_files[['userid',
                              '@id',
                              'filearea',
                              'contextid',
