@@ -21,6 +21,18 @@ conda activate mbz
 ./mbzbot.py -f moodlebackup.mbz
 ```
 
+##### CLI-Usage
+
+```bash
+usage: mbzbot.py [-h] [-f F] [-c] [-a]
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -f F        mbz file to extract
+  -c          compress images after extraction
+  -a          convert all mbz files in current directory
+```
+
 ##### System python
 
 Install packages:
