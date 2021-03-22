@@ -45,6 +45,7 @@ import shutil
 import zipfile
 import tarfile
 from PIL import Image
+import pyheif
 from queue import Queue
 import threading, multiprocessing
 
@@ -66,13 +67,29 @@ class ConvertWorker(threading.Thread):
                 self.queue.task_done()
 
     def process_data(self,i):
-        picture = Image.open(i)
+        dirname = os.path.dirname(i)
+        basename, extension = os.path.splitext(i)
+        if extension[1:].lower()=='heic':
+            heif_file = pyheif.read(i)
+            picture = Image.frombytes(
+                heif_file.mode, 
+                heif_file.size, 
+                heif_file.data,
+                "raw",
+                heif_file.mode,
+                heif_file.stride,
+                )
+            savename = os.path.abspath(basename+'.jpg')
+        else:
+            picture = Image.open(i)
+            savename = i
         size = picture.size
         factor = self.maxlen / np.max(picture.size)
         resize = tuple((int(k*factor) for k in size))
         try:
-            picture.resize(resize).save(i, optimize = self.optimize, quality = self.quality)
-        except: print("Error")
+            picture.resize(resize).save(savename, optimize = self.optimize, quality = self.quality)
+            if extension[1:].lower()=='heic': os.remove(i)
+        except: print("Error converting {:}".format(savename))
 
 
 class mbzbot:
@@ -157,7 +174,7 @@ class mbzbot:
         """
         compressdir = os.path.abspath(str(COMPRESSDIR))
         files = []
-        for ext in ('png', 'jpg','JPG','PNG'):
+        for ext in ('png', 'jpg','JPG','PNG','HEIC','heic'):
            files.extend(glob2.glob(compressdir+"/**/*.{:}".format(ext)))
 
         # initialize Queue

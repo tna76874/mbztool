@@ -3,3 +3,4 @@ numpy
 pandas_read_xml
 pandas
 pillow
+pyheif
