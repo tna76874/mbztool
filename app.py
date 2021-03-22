@@ -68,6 +68,12 @@ elif hasattr(sys, '_MEIPASS'):
 else:
     UPLOAD_LIMIT_GB = 5 * 1024 * 1024 * 1024 # 5GB
 
+## allow converting
+if hasattr(sys, '_MEIPASS') | (os.getenv("ALLOW_COMPRESSION")=="yes"):
+    allow_convert = True
+else:
+    allow_convert = False
+
 # define some functions
 def read_version():
     with open(os.path.join(ROOT_DIR,'VERSION')) as f:
@@ -136,7 +142,7 @@ def success():
         f = request.files['file']
         filename = secure_filename(f.filename)
 
-        if request.form.get('compress')=='yes':
+        if (request.form.get('compress')=='yes') & allow_convert:
             compress = True
         else:
             compress = False

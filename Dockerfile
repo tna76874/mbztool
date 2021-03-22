@@ -12,12 +12,14 @@ RUN pip install --no-cache-dir -r requirements.txt -r requirements_web.txt -r re
 
 COPY . .
 
-RUN python build.py -v && rm -rf /usr/src/app/.git
+RUN python build.py -v && rm -rf /usr/src/app/.git export upload extract
 
 EXPOSE 5000
 
 ENV LOG_LEVEL=debug
 ENV GUNICORN_TIMEOUT=120
 ENV UPLOAD_LIMIT_GB=0.5
+ENV ALLOW_COMPRESSION=no
+
 
 CMD [ "sh", "-c", "gunicorn --workers=5 --timeout ${GUNICORN_TIMEOUT} --bind=0.0.0.0:5000 --log-level=${LOG_LEVEL} --access-logfile=- app:app" ]

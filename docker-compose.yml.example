@@ -10,4 +10,5 @@ services:
     environment:
      - LOG_LEVEL=info
      - UPLOAD_LIMIT_GB=${UPLOAD_LIMIT_GB}
+     - ALLOW_COMPRESSION=${ALLOW_COMPRESSION}
     restart: unless-stopped
