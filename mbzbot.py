@@ -44,6 +44,36 @@ import numpy as np
 import shutil
 import zipfile
 import tarfile
+from PIL import Image
+from queue import Queue
+import threading, multiprocessing
+
+class ConvertWorker(threading.Thread):
+    def __init__(self, queue, maxlen = 1500, quality = 75, optimize = True):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        self.maxlen = maxlen
+        self.quality = 75
+        self.optimize = True
+
+    def run(self):
+        while True:
+            # Get the work from the queue and expand the tuple
+            convertfile = self.queue.get()
+            try:
+                self.process_data(convertfile)
+            finally:
+                self.queue.task_done()
+
+    def process_data(self,i):
+        picture = Image.open(i)
+        size = picture.size
+        factor = self.maxlen / np.max(picture.size)
+        resize = tuple((int(k*factor) for k in size))
+        try:
+            picture.resize(resize).save(i, optimize = self.optimize, quality = self.quality)
+        except: print("Error")
+
 
 class mbzbot:
     """
@@ -57,13 +87,14 @@ class mbzbot:
                     'zipdir'    : './myspecialdirectory',   # optional: a directory the zip file is exported
                     }
         """
-        
         self.rootdir = os.getcwd()
         self.extractroot = os.path.abspath(self.rootdir + '/extract')
         self.extractdir = None
         self.exportroot = os.path.abspath(self.rootdir + '/export')
         self.exportdir = None
         self.zipdir = None
+        self.compress = False
+        
         if config!=None:
             if 'zipdir' in config.keys():
                 self.zipdir = os.path.abspath(config['zipdir'])
@@ -71,12 +102,18 @@ class mbzbot:
                 self.rootdir = os.path.abspath(config["rootdir"])
                 self.extractroot = os.path.abspath(self.rootdir + '/extract')
                 self.exportroot = os.path.abspath(self.rootdir + '/export')
+            if 'compress' in config.keys():
+                self.compress = config["compress"]
+            # run mbzbot
             self.extractmbz(os.path.splitext(os.path.abspath(config['file']))[0]+'.mbz')
         else:
             self.parser = argparse.ArgumentParser()
             self.parser.add_argument("-f", help="mbz file to extract", required=False)
-            self.parser.add_argument("-a", help="convert all mbz files in current directory", action="store_true")   
+            self.parser.add_argument("-c", help="compress images after extraction", action="store_true")
+            self.parser.add_argument("-a", help="convert all mbz files in current directory", action="store_true")
             self.args = self.parser.parse_args()
+            
+            self.compress = self.args.c
             
             if self.args.a:
                 mbzlist = glob2.glob(self.rootdir+"/*.mbz")
@@ -113,6 +150,29 @@ class mbzbot:
             print("Can't figure out what type of archive file this is")
             return -1
         mbz['content'].extractall(destination)
+        
+    def compress_files(self,COMPRESSDIR, optimize = True, quality = 75, maxlen = 1500):
+        """
+        Compress files under given path
+        """
+        compressdir = os.path.abspath(str(COMPRESSDIR))
+        files = []
+        for ext in ('png', 'jpg','JPG','PNG'):
+           files.extend(glob2.glob(compressdir+"/**/*.{:}".format(ext)))
+
+        # initialize Queue
+        queue = Queue()
+
+        # initialize workers
+        for x in range(multiprocessing.cpu_count()-1):
+            worker = ConvertWorker(queue,maxlen = maxlen, quality = quality, optimize = optimize)
+            worker.daemon = True
+            worker.start()
+
+        # fill up queue
+        for file in files:
+            queue.put(file)
+        queue.join()
 
     def extractmbz(self,zfile):
         """
@@ -268,6 +328,8 @@ class mbzbot:
             
         # delete the extracted mbz files
         shutil.rmtree(self.extractdir)
+        # compress images, if selected
+        if self.compress: self.compress_files(self.exportdir)
         # zip all extracted files into one file
         shutil.make_archive(os.path.abspath(self.zipdir + '/' + os.path.splitext(os.path.basename(zfile))[0]), 'zip', self.exportdir)
         # delete the extracted files and have only the zip file left
