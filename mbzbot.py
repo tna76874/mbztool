@@ -40,6 +40,7 @@ import pandas as pd
 import pandas_read_xml as pdx
 import glob2
 import os
+import sys
 import numpy as np
 import shutil
 import zipfile
@@ -105,9 +106,13 @@ class mbzbot:
                     }
         """
         self.rootdir = os.getcwd()
-        self.extractroot = os.path.abspath(self.rootdir + '/extract')
+
+        if sys.platform == 'win32': TMPDIR = "/tmp"
+        else: TMPDIR = self.rootdir
+
+        self.extractroot = os.path.abspath(TMPDIR + '/.extract')
         self.extractdir = None
-        self.exportroot = os.path.abspath(self.rootdir + '/export')
+        self.exportroot = os.path.abspath(TMPDIR + '/.export')
         self.exportdir = None
         self.zipdir = None
         self.compress = False
@@ -117,8 +122,8 @@ class mbzbot:
                 self.zipdir = os.path.abspath(config['zipdir'])
             if 'rootdir' in config.keys():
                 self.rootdir = os.path.abspath(config["rootdir"])
-                self.extractroot = os.path.abspath(self.rootdir + '/extract')
-                self.exportroot = os.path.abspath(self.rootdir + '/export')
+                self.extractroot = os.path.abspath(self.rootdir + '/.extract')
+                self.exportroot = os.path.abspath(self.rootdir + '/.export')
             if 'compress' in config.keys():
                 self.compress = config["compress"]
             # run mbzbot
@@ -138,6 +143,10 @@ class mbzbot:
                     self.extractmbz(os.path.abspath(i))
             elif (not self.args.a) & (self.args.f != None):
                 self.extractmbz(self.args.f)
+
+            # clean up tmp directories
+            for i in [self.extractroot, self.exportroot]:
+                if os.path.exists(i): shutil.rmtree(i)
 
     def unzip(self,mbz_filepath,destination):
         """
