@@ -111,7 +111,8 @@ app.config["SOURCE_URL_DESCRIPTION"] = "git-{}-{}".format(app.config["VERSION"][
 # create mandatory folders, of not exist
 for i in ['UPLOAD_FOLDER','DOWNLOAD_FOLDER']:
     if not os.path.exists(app.config[i]):
-        os.makedirs(app.config[i])
+        try: os.makedirs(app.config[i])
+        except: pass
 
 # routings
 @app.route('/')  
